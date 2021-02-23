@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Volleyball Analysis Visualization</title>
+        <meta charset="UTF-8">
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" />
+        
+        <!-- CSS Code Here-->
+        <style>
+            svg{
+                width: 700px;
+                height: 750px;
+                border: 1px solid gray;
+            }
+
+            text {
+                font-family: sans-serif;
+            }
+
+            .title {
+                font-family:sans-serif;
+                font-size:1.0em;
+                fill:black;
+            }
+
+            select {
+                margin-right: 20px;
+            }
+            .column {
+                float: left;
+                width: 50%;
+            }
+
+            /* Clear floats after the columns */
+            .row:after {
+                content: "Hello";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+
+    <!-- Body Code Here-->
+    <body>
+        <h1>Female Professional Volleyball Players Height vs Spike Height (Point of Contact with Running Approach)</h1>
+        <h6><a href="https://www.kaggle.com/johnpendenque/women-volleyball-players">Data Source: https://www.kaggle.com/johnpendenque/women-volleyball-players</a></h6>
+        <h5>Sullivan Dupre - sullivandupre84@gmail.com</h5>
+        <p1>
+            <b>Introduction: </b>Volleyball is a sport where height and vertical jump is a big part of the game especially when it comes to attacking by spiking the ball onto the opponents' court. 
+            The higher your contact point (what the FIVB measures as spike touch), the more room you have to hit the ball into an area of the court that neither blockers nor defenders are defending.
+            In this regard, taller players have an advatage but all players can improve their spike (which is measured by a player using a running appraoch before jumping into the air) regardless of height
+            by improving their vertical jump. This visualization analyzes female professional volleyball players from their national teams to measure the correlation between how tall a player is and 
+            what is their highest point of contact with a running approach via a scatterplot. The visualization also analyzes what position each player plays by color coding the scatterplot.
+
+
+        </p1>
+        <svg id='svg1'></svg> 
+        <br></br>
+        <p1>
+            <b>Visualization Explained: </b>The first thing this visualization is that there appears to be a strong correlation between the height of a player and how high the player touches with a running 
+            start. This makes sense as taller players do not need as big of a vertical jump to achieve a higher point of contact. The second observation a viewer can make are that the taller players who can 
+            also achieve a high point of contact tend to be the players who are opposite spikers and middles. This makes sense because middles are expected to do most of the blocking which requires players playing
+            at a high level to have a high point of contact. Opposite spikers are known to be the attacking/spiking specialists of the teams and will also need to block the other team's wing spikers meaning they are 
+            also more likely to be tall and to touch higher than other volleyball players. Liberos on the other hand do not attack or spike at all and therefore are more likely to be shorter and not to have a high
+            point of contact. Libero's short stature often allows them to have an advantage over taller players in making defensive plays. Thus it makes sense that the players analyzed are shorter and do not jump as high.
+            Since wing spikers and setters are often required to be well-rounded players in defense, attacking, and blocking, it makes sense for the visualization to show that there is a variety of wing spikers and setters
+            in how high the players contact with a running jump and how tall they are. Short and tall players can be found playing wing spikers and setters.
+        </p1>
+    </body>
+    
+    <!-- JS Code Here-->
+    <script>
+        const svg = d3.select('#svg1')
+        // const svg2 = d3.select('#svg2')
+
+        //convert pixel numbers to numbers
+        const width = +svg.style('width').replace('px','')
+        const height = +svg.style('height').replace('px','')
+
+        //set margins object
+        const margin = { top:50, bottom:400, right:50, left:75 }
+
+        //set inner dimensions for axis
+        const innerWidth = width - margin.left - margin.right
+        const innerHeight = height - margin.top - margin.bottom
+        let scatterData
+        console.log('Running...')
+    </script>
+    <script>
+        function drawScatterPlot(attr1, attr2){
+            console.log("Drawing ScatterPlot...")
+
+            let xAttrib = attr1
+            let yAttrib = attr2
+
+            const xScale = d3.scaleLinear()
+                            .domain([150, d3.max(scatterData, d => d[xAttrib])]) //data space
+                            .range([0, innerWidth])
+
+            const yScale = d3.scaleLinear()
+                            .domain([140, d3.max(scatterData, d => d[yAttrib])]) //data space
+                            .range([innerHeight, 0])
+
+            svg.select('g').remove() 
+            const g = svg.append('g')
+                            .attr('transform', 'translate('+margin.left+', '+margin.top+')')
+
+            // append circles on the left plot
+            const scatter = g.selectAll('circle')
+                .data(scatterData)
+                .enter()
+                .append('circle')
+                .attr('cx', d => xScale(d[xAttrib]))
+                .attr('cy', d => yScale(d[yAttrib]))
+                .attr('r', function(d){
+
+                   return 3
+                })
+                // Color Code Each Dot Based Off Of Player Position
+                .style('fill',function(d){
+                    if (d["position_number"] == 1){
+                        return "orange"   
+                    }
+                    else if (d["position_number"] == 2){
+                        return "red" 
+                    }
+                    else if (d["position_number"] == 3){
+                        return "blue" 
+                    }
+                    else if (d["position_number"] == 4){
+                        return "green" 
+                    }
+                    else if (d["position_number"] == 6){
+                        return "gray" 
+                    }
+                    else {
+                        return "black"
+                    }
+                    
+                })
+
+            // create x and y Axis
+            const yAxis = d3.axisLeft(yScale)
+                g.append('g').call(yAxis)
+            const xAxis = d3.axisBottom(xScale)
+                g.append('g').call(xAxis)
+                .attr('transform', `translate(0,${innerHeight})`)
+
+            // Add Title
+            g.append('text')
+                .attr('class','title')
+                .attr('x', 60)
+                .attr('y', -innerHeight+275)
+                .text("2020 Professional Volleyball Players Height vs. Spike");
+            
+            g.append('text')
+                .attr('class','title')
+                .attr('x', 60)
+                .attr('y', -innerHeight+290)
+                .text("Color-Coded by Player Position");
+
+            // Add X-Axis Caption
+            g.append('text')
+                .attr('x', innerWidth/3)
+                .attr('y', innerHeight+40)
+                .text("Player Spike (cm)")
+            
+            // Add Y-Axis Caption
+            g.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('x', (-innerHeight/2))
+                .attr('y', '-55px')
+                .attr('text-anchor', 'middle')
+                .text("Player Height (cm)")
+            
+            // Create Rectangle For Legend
+            g.append('rect')
+                .attr('x',((0)))
+                .attr('y', innerHeight+75)
+                .attr('width',innerWidth)
+                .attr('height','200')
+                .style('fill','White')
+                .style('stroke','gray');
+            
+            // Add All Legend Elements Below
+            g.append('text')
+                .style('font-weight', 'bold')
+                .attr('y', innerHeight+100)
+                .attr('x', 10)
+                .text('Legend')
+            
+            g.append('text')
+                .style('font-weight', 'bold')
+                .style('font-size', '12px')
+                .attr('y', innerHeight+130)
+                .attr('x', 10)
+                .text('Player Position')
+            
+                g.append('rect')
+                .attr('x',10)
+                .attr('y', innerHeight+135)
+                .attr('width','20')
+                .attr('height','20')
+                .style('fill','green')
+
+            g.append('text')
+                .style('font-size', '12px')
+                .attr('x', 35)
+                .attr('y', innerHeight+150)
+                .text('Opposite Spiker/Right Side Hitter')
+
+            g.append('rect')
+                .attr('x',10)
+                .attr('y', innerHeight+160)
+                .attr('width','20')
+                .attr('height','20')
+                .style('fill','orange')
+
+            g.append('text')
+                .style('font-size', '12px')
+                .attr('x', 35)
+                .attr('y', innerHeight+175)
+                .text('Setter')
+
+            g.append('rect')
+                .attr('x',10)
+                .attr('y', innerHeight+185)
+                .attr('width','20')
+                .attr('height','20')
+                .style('fill','blue')
+
+            g.append('text')
+                .style('font-size', '12px')
+                .attr('x', 35)
+                .attr('y', innerHeight+200)
+                .text('Middle Hitter/Blocker')
+            
+            g.append('rect')
+                .attr('x',10)
+                .attr('y', innerHeight+210)
+                .attr('width','20')
+                .attr('height','20')
+                .style('fill','red')
+    
+            g.append('text')
+                .style('font-size', '12px')
+                .attr('x', 35)
+                .attr('y', innerHeight+225)
+                .text('Wing Spiker/Outside Hitter')
+            
+            g.append('rect')
+                .attr('x',10)
+                .attr('y', innerHeight+235)
+                .attr('width','20')
+                .attr('height','20')
+                .style('fill','grey')
+    
+            g.append('text')
+                .style('font-size', '12px')
+                .attr('x', 35)
+                .attr('y', innerHeight+250)
+                .text('Libero')
+        }
+    </script>
+    <script>
+        d3.csv('data/clean_data.csv').then(data => {
+            var attr1 = 'height'
+            var attr2 = 'spike'
+            var attr3 = 'position_number'
+
+
+            data.map(function(d) {
+                d[attr1] = +d[attr1]
+                d[attr2] = +d[attr2]
+                d[attr3] = +d[attr3]
+
+            })
+
+            scatterData = data
+
+            console.log(scatterData)
+            drawScatterPlot(attr2, attr1)
+        })
+    </script>
+</html>
